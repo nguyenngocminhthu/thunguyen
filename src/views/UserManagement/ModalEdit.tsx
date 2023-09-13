@@ -1,4 +1,4 @@
-import { Button, Form, Input, Select, Modal } from "antd";
+import { Button, Form, Input, Select, Modal, message } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { DataType } from ".";
@@ -20,6 +20,7 @@ const ModalEdit = ({
   const [roles, setRoles] = useState<{ id: string; role: string }[]>([]);
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     setIsLoading(true);
@@ -37,8 +38,8 @@ const ModalEdit = ({
   }, [data]);
 
   const layout = {
-    labelCol: { span: 4 },
-    wrapperCol: { span: 20 },
+    labelCol: { span: 6 },
+    wrapperCol: { span: 18 },
   };
 
   /* eslint-disable no-template-curly-in-string */
@@ -53,8 +54,6 @@ const ModalEdit = ({
     },
   };
 
-  const onOk = () => {};
-
   const onFinish = (values: any) => {
     if (isModalOpen === "Edit") {
       axios
@@ -67,6 +66,16 @@ const ModalEdit = ({
         })
         .finally(() => {
           setIsLoading(false);
+          messageApi.open({
+            type: "success",
+            content: "Update user successfully!",
+          });
+        })
+        .catch((err) => {
+          messageApi.open({
+            type: "error",
+            content: err.message,
+          });
         });
     } else {
       axios
@@ -78,8 +87,19 @@ const ModalEdit = ({
         })
         .finally(() => {
           setIsLoading(false);
+          messageApi.open({
+            type: "success",
+            content: "Create user successfully!",
+          });
+        })
+        .catch((err) => {
+          messageApi.open({
+            type: "error",
+            content: err.message,
+          });
         });
     }
+    form.resetFields();
 
     handleOk();
   };
@@ -88,13 +108,13 @@ const ModalEdit = ({
       footer={null}
       title={isModalOpen === "Create" ? "Create User" : "Edit User"}
       open={isModalOpen !== ""}
-      onOk={onOk}
       onCancel={() => {
         handleCancel();
         form.resetFields();
       }}
       closeIcon
     >
+      {contextHolder}
       <Form
         {...layout}
         name="nest-messages"
@@ -106,13 +126,17 @@ const ModalEdit = ({
         <Form.Item name="name" label="Name" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="email" label="Email" rules={[{ type: "email" }]}>
+        <Form.Item
+          name="email"
+          label="Email"
+          rules={[{ type: "email", required: true }]}
+        >
           <Input />
         </Form.Item>
         <Form.Item
           name="username"
           label="Username"
-          rules={[{ type: "string" }]}
+          rules={[{ type: "string", required: true }]}
         >
           <Input />
         </Form.Item>
@@ -123,7 +147,7 @@ const ModalEdit = ({
         >
           <Input.Password />
         </Form.Item>
-        <Form.Item name="role" label="Role">
+        <Form.Item name="role" label="Role" rules={[{ required: true }]}>
           <Select>
             {roles.map((role) => (
               <Select.Option value={role.role}>{role.role}</Select.Option>

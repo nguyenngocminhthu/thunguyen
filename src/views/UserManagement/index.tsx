@@ -1,5 +1,5 @@
 import { DeleteFilled, EditFilled, PlusOutlined } from "@ant-design/icons";
-import { Avatar, Space, Table, Button } from "antd";
+import { Avatar, Space, Table, Button, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -34,6 +34,7 @@ const UserManagement = () => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const fetchUsers = () => {
     setIsLoading(true);
@@ -59,9 +60,19 @@ const UserManagement = () => {
       .then(() => {
         fetchUsers();
         setOpen(false);
+        messageApi.open({
+          type: "success",
+          content: "Delete user successfully!",
+        });
       })
       .finally(() => {
         setIsLoading(false);
+      })
+      .catch((err) => {
+        messageApi.open({
+          type: "error",
+          content: err.message,
+        });
       });
   };
 
@@ -120,7 +131,7 @@ const UserManagement = () => {
 
   return (
     <>
-      {" "}
+      {contextHolder}
       <div className="user-management">
         <h1>User Management</h1>
         <Button className="add-btn" onClick={() => setOpenEdit("Create")}>
